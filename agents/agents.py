@@ -32,7 +32,7 @@ class DQN_agent:
         self.reward = 0
         self.action = None
         #4 donnée de state avec 3 valeures possible et 4 actions possible
-        self.q_table = np.random.uniform(low=-2, high=0, size=(3, 3, 3, 3, 4))
+        self.q_table = np.random.uniform(low=-80, high=110, size=(3, 3, 3, 3, 4))
 
         self.learning_rate = 0.1
         self.discount = 0.95

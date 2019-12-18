@@ -12,9 +12,9 @@ class Game:
     def __init__(self):
         self.running = True
         self.game_count = 0
-        self.max_game = 1000
+        self.max_game = 1500
         self.step_count = 0
-        self.max_step = 500
+        self.max_step = 1500
         self.render = True
         self.agent = DQN_agent()
         self.environement = Environement1()
@@ -73,7 +73,7 @@ class Game:
 
         if not self.game_over():
             self.agent.learn()
-        elif(self.agent.new_state[0] == 0 and self.agent.new_state[1] == 0):
+        elif(self.agent.new_state[0] == 1 and self.agent.new_state[1] == 1):
             print("win")
             self.agent.win()
 

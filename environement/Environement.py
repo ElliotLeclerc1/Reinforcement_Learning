@@ -56,8 +56,19 @@ class Environement1(Environement):
     def __init__(self):
         super().__init__()
         self.player = Player(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 10, 10, 0)
-        self.foods.append(Food(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 5, 5, 0))
-        self.walls.append(Wall(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 30, 50, 45))
+
+        wall = Wall(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 30, 50, 0)
+        while rectangles_colision(wall, self.player):
+            wall = Wall(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 30, 50, 0)
+        self.walls.append(wall)
+
+        food = Food(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 5, 5, 0)
+        while rectangles_colision(wall, food) or rectangles_colision(self.player, food):
+            food = Food(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 5, 5, 0)
+        self.foods.append(food)
+
+
+
         self.interpreter = Interpretor1()
         self.state = self.interpreter.get_state(self.player, self.foods, self.walls)
         self.reward = self.interpreter.get_reward(self.foods)
