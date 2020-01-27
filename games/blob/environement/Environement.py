@@ -14,8 +14,12 @@ class Environement:
         self.step_foward_reward = 1
         self.win_reward = 25
         self.interpreter = None
-        self.state = None
-        self.reward = None
+
+    def get_state(self):
+        return self.interpreter.get_state()
+
+    def get_reward(self):
+        return self.interpreter.get_reward()
 
     def turn(self, action):
         prev_position = (self.player.x, self.player.y)
@@ -34,9 +38,6 @@ class Environement:
 
             if colide_food:
                 self.foods = []
-
-        self.state = self.interpreter.get_state(self.player, self.foods, self.walls)
-        self.reward = self.interpreter.get_reward(self.foods)
 
     def check_wall_colide(self, wall):
         return rectangles_colision(wall, self.player)

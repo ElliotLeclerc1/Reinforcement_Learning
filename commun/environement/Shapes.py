@@ -41,7 +41,7 @@ class Rectangle:
 
         self.corners = rectangle_corners
 
-    # rotation dans le sens anti horraire height y, width x
+    # rotation dans le sens horraire height y, width x
     def rotate_point(self, coord, theta):
         rad = 2 * np.pi / 360 * theta
         rotation_matrix = np.array([[np.cos(rad), -np.sin(rad)], [np.sin(rad), np.cos(rad)]])
