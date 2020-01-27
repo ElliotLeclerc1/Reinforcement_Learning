@@ -8,37 +8,6 @@ import numpy as np
 import time
 
 # Own Tensorboard class
-class ModifiedTensorBoard(TensorBoard):
-
-    # Overriding init to set initial step and writer (we want one log file for all .fit() calls)
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.step = 1
-        self.writer = tf.summary.FileWriter(self.log_dir)
-
-    # Overriding this method to stop creating default log writer
-    def set_model(self, model):
-        pass
-
-    # Overrided, saves logs with our step number
-    # (otherwise every .fit() will start writing from 0th step)
-    def on_epoch_end(self, epoch, logs=None):
-        self.update_stats(**logs)
-
-    # Overrided
-    # We train for one batch only, no need to save anything at epoch end
-    def on_batch_end(self, batch, logs=None):
-        pass
-
-    # Overrided, so won't close writer
-    def on_train_end(self, _):
-        pass
-
-    # Custom method for saving own metrics
-    # Creates writer, writes custom metrics and closes writer
-    def update_stats(self, **stats):
-        self._write_logs(stats, self.step)
-
 
 class DQN_agent:
     def __init__(self):
@@ -54,7 +23,7 @@ class DQN_agent:
 
         self.replay_memory = deque(maxlen=self.replay_memory_size)
 
-        self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format(self.model_name, int(time.time())))
+        #self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format(self.model_name, int(time.time())))
 
         # Used to count when to update target network with main network's weights
         self.target_update_counter = 0
@@ -72,12 +41,16 @@ class DQN_agent:
 
     def store_transition(self, new_action, reward):
         #Todo "stuf"
+        return NotImplemented
 
     def calculate_loss(self):
+        return NotImplemented
 
     def gradient_descent(self):
+        return NotImplemented
 
     def update_model(self):
+        return NotImplemented
 
 
     def creat_model(self):

@@ -1,6 +1,6 @@
-from environement.Props import Player, Food, Wall
-from physics.ColisionDetection import rectangles_colision
-from interpreters.Interpreters import Interpretor1
+from games.blob.environement.Props import Player, Food, Wall
+from commun.physics.ColisionDetection import rectangles_colision
+from games.blob.interpreters.Interpreters import Interpretor1
 import numpy as np
 
 

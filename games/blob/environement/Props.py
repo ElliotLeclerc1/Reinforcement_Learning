@@ -1,4 +1,4 @@
-from environement import Shapes
+from commun.environement import Shapes
 import pygame
 
 white = (255, 255, 255)
