@@ -1,7 +1,7 @@
-from games.trafic_lights import game
+from games.blob.blob_game import Game
 
 if __name__ == '__main__':
 
-    game = game.Game()
+    game = Game()
     game.render = True
     game.play()

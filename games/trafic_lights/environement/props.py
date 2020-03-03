@@ -2,21 +2,16 @@ import pygame
 from commun.environement import Shapes
 from enum import Enum
 
-
-class Directions(Enum):
-    Top = 0
-    Right = 1
-    Bottom = 2
-    Left = 3
+Direction_vector = [(0, 1), (1, 0), (0, -1), (-1, 0)]
+Angle = [90, 180, 270, 0]
+lane_size = 12
 
 
-class Light(Shapes.Rectangle):
-    def __init__(self, x, y, width, height, angle):
-        super().__init__(x, y, width, height, angle)
-        self.is_green = True
-
-    def switch(self):
-        self.is_green = not self.is_green
+class Direction(Enum):
+    TOP = 0
+    RIGHT = 1
+    BOT = 2
+    LEFT = 3
 
 
 class Cars(Shapes.Rectangle):
@@ -28,16 +23,41 @@ class Cars(Shapes.Rectangle):
         pygame.draw.polygon(display, self.color, self.corners)
 
 
+class Light(Shapes.Rectangle):
+    def __init__(self, x, y, width, height, angle):
+        super().__init__(x, y, width, height, angle)
+        self.is_green = True
+
+    def switch(self):
+        self.is_green = not self.is_green
+
+
 class Lane(Shapes.Rectangle):
-    def __init__(self, x, y, width, height, angle, cars, direction, light):
+    def __init__(self, x, y, width, height, angle, cars, direction_vector, light):
         super().__init__(x, y, width, height, angle)
         self.cars = cars
-        self.direction = direction
+        self.direction_vector = direction_vector
         self.connections = []
         self.light = light
+        self.color = (50, 50, 50)
 
     def add_conection(self, destination_lane):
         self.connections.append(destination_lane)
+
+    def render(self, display):
+        pygame.draw.polygon(display, self.color, self.corners)
+
+
+class Sides_info:
+    def __init__(self, nb_straight_lane_to_intersection, nb_of_left_turn_lanes, nb_of_right_turn_lanes, nb_of_lanes_from_intersection, direction):
+        self.nb_straight_lane_to_intersection = nb_straight_lane_to_intersection
+        self.nb_of_lanes_from_intersection = nb_of_lanes_from_intersection
+        self.nb_of_left_turn_lanes = nb_of_left_turn_lanes
+        self.nb_of_right_turn_lanes = nb_of_right_turn_lanes
+        self.angle = Angle[direction.value]
+        self.width = 100
+        self.height = (nb_of_left_turn_lanes + nb_of_lanes_from_intersection + nb_of_right_turn_lanes + nb_straight_lane_to_intersection)*lane_size
+        self.direction = direction
 
 
 class Side(Shapes.Rectangle):
@@ -45,68 +65,74 @@ class Side(Shapes.Rectangle):
         super().__init__(x, y, width, height, angle)
         self.direction = direction
         self.lanes = lanes
+        self.color = (100, 100, 100)
+
+    def render(self, display):
+        pygame.draw.polygon(display, self.color, self.corners)
+        for lane in self.lanes:
+            lane.render(display)
 
 
 class Intersection(Shapes.Rectangle):
-    def __init__(self, x, y, width, height, angle, sides):
-        super().__init__(x, y, width, height, angle)
-        self.sides = sides
+    def __init__(self, x, y, sides_info):
+        self.sides_info = sides_info
+        self.side = self.get_dimentions()
+        super().__init__(x, y, self.side, self.side, 0)
+        self.sides = self.get_sides()
+        self.color = (200, 200, 200)
 
-    def render(self, display):
-        pass
+    def get_dimentions(self):
+        side = 0
+        for side_info in self.sides_info:
+            side = max(side, side_info.height)
 
+        return side
 
-
-class Simple_intersection(Intersection):
-    def __init__(self, x, y, width, height, angle):
-        sides = self.sides()
-        super().__init__(x, y, width, height, angle, sides)
 
     def get_sides(self):
         sides = []
-        for i in range(4):
-            direction = Directions(i)
-            lanes = self.get_lanes(direction)
-            side = Side(direction, lanes)
-
-            sides.append(side)
+        side_width = 100
+        for side_info in self.sides_info:
+            if side_info is not None:
+                side_center_x = self.x + (self.side/2 + side_width/2)*Direction_vector[side_info.direction.value][0]
+                side_center_y = self.y + (self.side/2 + side_width/2)*Direction_vector[side_info.direction.value][1]
+                side = Side(side_center_x, side_center_y, side_width, side_info.height, side_info.angle, side_info.direction, self.get_lanes(side_info, (side_center_x, side_center_y)))
+                sides.append(side)
 
         return sides
 
-    def get_lanes(self, side):
+    def get_lanes(self, side_info, side_center):
         lanes = []
-        for i in range(2):
-            cars = []
-            lane = Lane(cars, side, Light())
-            opposit_lane = Lane([], get_opposit_direction(side), None)
 
-            lanes.append(opposit_lane)
+        #on ajoute les lanes de gauche a droite
+        for i in range(side_info.nb_of_lanes_from_intersection):
+            padding = 1
+            direction = Direction_vector[side_info.direction.value] #todo corriger direction inversé
+            x = side_center[0] - (side_info.height/2 - lane_size*len(lanes) - lane_size/2)*direction[1]
+            y = side_center[1] + (side_info.height/2 - lane_size*len(lanes) - lane_size/2)*direction[0]
+            height = lane_size - 2*padding
+            width = side_info.width
+            lane = Lane(x, y, width, height, side_info.angle, [], direction, None)
+            lanes.append(lane)
+
+        for i in range(side_info.nb_of_left_turn_lanes + side_info.nb_of_right_turn_lanes + side_info.nb_straight_lane_to_intersection):
+            padding = 1
+            direction = Direction_vector[side_info.direction.value]
+            x = side_center[0] - (side_info.height/2 - lane_size*len(lanes) - lane_size/2)*direction[1]
+            y = side_center[1] + (side_info.height/2 - lane_size*len(lanes) - lane_size/2)*direction[0]
+            height = lane_size - 2*padding
+            width = side_info.width
+            lane = Lane(x, y, width, height, side_info.angle, [], direction, self.get_light())
             lanes.append(lane)
 
         return lanes
 
+    def get_light(self):
+        return None
 
+    def render(self, display):
+        pygame.draw.polygon(display, self.color, self.corners)
 
-def get_opposit_direction(direction):
-    if direction == Directions.Top:
-        return Directions.Bottom
-    if direction == Directions.Right:
-        return Directions.Left
-    if direction == Directions.Bottom:
-        return Directions.Top
-    if direction == Directions.Left:
-        return Directions.Right
+        for side in self.sides:
+            side.render(display)
 
-    return None
-
-def get_next_direction(direction):
-    if direction == Directions.Top:
-        return Directions.Left
-    if direction == Directions.Right:
-        return Directions.Top
-    if direction == Directions.Bottom:
-        return Directions.Right
-    if direction == Directions.Left:
-        return Directions.Bottom
-
-    return None

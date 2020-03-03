@@ -15,11 +15,14 @@ class Environement:
         self.win_reward = 25
         self.interpreter = None
 
+    def game_over(self):
+        return len(self.foods) == 0
+
     def get_state(self):
-        return self.interpreter.get_state()
+        return self.interpreter.get_state(self.player, self.foods, self.walls, self.world_size)
 
     def get_reward(self):
-        return self.interpreter.get_reward()
+        return self.interpreter.get_reward(self.foods)
 
     def turn(self, action):
         prev_position = (self.player.x, self.player.y)
@@ -71,7 +74,7 @@ class Environement1(Environement):
 
 
         self.interpreter = Interpretor1()
-        self.state = self.interpreter.get_state(self.player, self.foods, self.walls)
+        self.state = self.interpreter.get_state(self.player, self.foods, self.walls, self.world_size)
         self.reward = self.interpreter.get_reward(self.foods)
 
 

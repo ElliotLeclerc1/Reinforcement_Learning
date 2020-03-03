@@ -1,32 +1,17 @@
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Conv2D, MaxPooling2D, Activation, Flatten
-from keras.callbacks import TensorBoard
-from keras.optimizers import Adam
 from collections import deque
-import tensorflow as tf
 import numpy as np
+from games.blob.agents.models import Simple_Blob_model, ReplayMemory
 import time
+import torch
 
-# Own Tensorboard class
+
 
 class DQN_agent:
     def __init__(self):
-        self.model_name = "256x2"
-        self.replay_memory_size = 50_000
+        self.prediction_model = Simple_Blob_model(300*300)
+        self.learning_model = Simple_Blob_model(300*300)
+        self.replay_memory = ReplayMemory(100_000)
 
-        #main model train every set
-        self.model = self.creat_model()
-
-        #target model get predict every step
-        self.target_model = self.creat_model()
-        self.target_model.set_weights(self.model.get_weights())
-
-        self.replay_memory = deque(maxlen=self.replay_memory_size)
-
-        #self.tensorboard = ModifiedTensorBoard(log_dir="logs/{}-{}".format(self.model_name, int(time.time())))
-
-        # Used to count when to update target network with main network's weights
-        self.target_update_counter = 0
 
     def get_action(self, state):
         epsilon = 0
@@ -34,14 +19,17 @@ class DQN_agent:
             return self.predict(state)
 
         random_action = "something"
-        return random_action
+        return 0
 
     def predict(self, state):
-        return self.target_model.predict(np.array(state).reshape(-1, *state.shape))[0]
+        state = torch.from_numpy(state)
+        return 0
+        #return self.prediction_model(*state)
 
-    def store_transition(self, new_action, reward):
+    def store_transition(self, state, action, new_action, reward):
         #Todo "stuf"
-        return NotImplemented
+        log = [state, action, new_action, reward]
+        return self.replay_memory.push(log)
 
     def calculate_loss(self):
         return NotImplemented
@@ -54,27 +42,7 @@ class DQN_agent:
 
 
     def creat_model(self):
-        model = Sequential()
+        pass
 
-        env_OBSERVATION_SPACE_VALUES = 12 #position et dimention de chaque objet
-        env_ACTION_SPACE_SIZE = 4
-
-        model.add(Conv2D(256, (3, 3), input_shape=env_OBSERVATION_SPACE_VALUES))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-
-        model.add(Conv2D(256, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-        model.add(Dropout(0.2))
-
-        model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
-        model.add(Dense(64))
-
-        model.add(Dense(env_ACTION_SPACE_SIZE, activation='linear'))  # ACTION_SPACE_SIZE = how many choices (4)
-        model.compile(loss="mse", optimizer=Adam(lr=0.001), metrics=['accuracy'])
-        return model
-
-    def update_replay_memory(self, transition):
-        self.replay_memory.append(transition)
+    def update_replay_memory(self, log):
+        self.replay_memory.push(log)

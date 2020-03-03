@@ -9,16 +9,16 @@ class Interpretor1:
         self.step_foward_reward = 1
 
     def get_state(self, player, foods, walls, world_size):
-
-
-        state = np.zeros(world_size)
+        #fix temporaire
+        padded_size = (world_size[0]+100, world_size[1]+100)
+        state = np.zeros(padded_size)
         row_player, col_player = polygon(np.array(player.corners)[:, 1], np.array(player.corners)[:, 0])
-
         state[row_player, col_player] = 1
 
         for food in foods:
             row_food, col_food = polygon(np.array(food.corners)[:, 1], np.array(food.corners)[:, 0])
             state[row_food, col_food] = 2
+
 
         for wall in walls:
             row_wall, col_wall = polygon(np.array(wall.corners)[:, 1], np.array(wall.corners)[:, 0])

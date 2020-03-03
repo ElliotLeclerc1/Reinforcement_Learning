@@ -1,7 +1,8 @@
+from games.blob.environement.Environement import Environement1
+from games.blob.agents.agents import DQN_agent
+from rendering.Window import Window
 import pygame
 import sys
-from rendering.Window import Window
-from games.trafic_lights.environement.environements import SingleLight_Environement
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -15,8 +16,8 @@ class Game:
         self.step_count = 0
         self.max_step = 1500
         self.render = True
-        self.agent = None
-        self.environement = SingleLight_Environement()
+        self.agent = DQN_agent()
+        self.environement = Environement1()
 
     def play(self):
         if self.render:
@@ -40,7 +41,7 @@ class Game:
                     if event.type == pygame.QUIT:
                         self.running = False
 
-                props = [self.environement.intersection]
+                props = [self.environement.player] + self.environement.walls + self.environement.foods
                 self.window.render(props)
 
         if self.render:
@@ -51,13 +52,13 @@ class Game:
     def new_game(self):
         print(self.game_count)
         self.render = self.game_count%100 == 0
-        #self.agent = Simple_perfect_agent()
+        self.agent = DQN_agent()
         #self.agent.reward = 0
         self.step_count = 0
-        self.environement = SingleLight_Environement()
+        self.environement = Environement1()
 
     def game_over(self):
-        return NotImplementedError
+        return self.environement.game_over()
 
     def step(self):
 
@@ -66,13 +67,10 @@ class Game:
 
         self.environement.turn(action)
 
-        self.agent.new_state = self.environement.get_state()
-        self.agent.reward = self.environement.get_reward()
+        new_state = self.environement.get_state()
+        reward = self.environement.get_reward()
 
-        if not self.game_over():
-            self.agent.learn()
-        elif(self.agent.new_state[0] == 1 and self.agent.new_state[1] == 1):
-            print("win")
-            self.agent.win()
+        self.agent.store_transition(state, action, new_state, reward)
+        print(self.agent.replay_memory.len())
 
         self.step_count += 1
