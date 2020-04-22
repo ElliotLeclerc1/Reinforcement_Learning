@@ -1,7 +1,7 @@
 from skimage.draw import polygon
 import numpy as np
 
-class Interpretor1:
+class Perfect_info_interpretor:
     def __init__(self):
         self.state = None
         self.win_reward = 25
@@ -9,8 +9,7 @@ class Interpretor1:
         self.step_foward_reward = 1
 
     def get_state(self, player, foods, walls, world_size):
-        #fix temporaire
-        padded_size = (world_size[0]+100, world_size[1]+100)
+        padded_size = (world_size[0], world_size[1])
         state = np.zeros(padded_size)
         row_player, col_player = polygon(np.array(player.corners)[:, 1], np.array(player.corners)[:, 0])
         state[row_player, col_player] = 1
@@ -30,10 +29,9 @@ class Interpretor1:
 
 
     def get_reward(self, foods):
-
         reward = -1
 
         if len(foods) == 0:
-            reward = 25
+            reward = 500
 
         return reward

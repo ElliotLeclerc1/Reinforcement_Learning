@@ -27,7 +27,7 @@ class Player(Shapes.Rectangle):
     def __init__(self, x, y, width, height, angle):
         super().__init__(x, y, width, height, angle)
         self.color = (0, 255, 0)
-        self.speed = 1
+        self.speed = 5
 
     def move(self, displacement):
         super().move(displacement)
