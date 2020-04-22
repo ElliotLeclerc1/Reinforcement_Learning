@@ -46,13 +46,13 @@ class Environement:
         return rectangles_colision(wall, self.player)
 
     def keep_in_world(self):
-        if self.player.x + self.player.width > self.world_size[0]:
+        if self.player.x + self.player.width >= self.world_size[0]:
             self.player.x = self.world_size[0] - self.player.width
-        if self.player.y + self.player.height > self.world_size[1]:
+        if self.player.y + self.player.height >= self.world_size[1]:
             self.player.y = self.world_size[1] - self.player.height
-        if self.player.x - self.player.width < 0:
+        if self.player.x - self.player.width <= 0:
             self.player.x = 0 + self.player.width
-        if self.player.y - self.player.height < 0:
+        if self.player.y - self.player.height <= 0:
             self.player.y = 0 + self.player.height
 
 
@@ -66,9 +66,9 @@ class Simple_blob_environement(Environement):
         #    wall = Wall(int(np.random.uniform(0, 1) * (self.world_size[0]-26)), int(np.random.uniform(0, 1) * (self.world_size[1]-26)), 30, 50, 0)
         #self.walls.append(wall)
 
-        food = Food(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-3)), 20, 20, 0)
+        food = Food(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-11)), 20, 20, 0)
         while rectangles_colision(self.player, food):
-            food = Food(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-3)), 20, 20, 0)
+            food = Food(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-11)), 20, 20, 0)
         self.foods.append(food)
 
         self.interpreter = Perfect_info_interpretor()
