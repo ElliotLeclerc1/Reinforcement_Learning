@@ -44,16 +44,20 @@ class ReplayMemory():
 class Simple_Blob_model(nn.Module):
     def __init__(self, input_size):
         super(Simple_Blob_model, self).__init__()
-        self.conv1 = nn.Conv2d(1, 8, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(8, 16, kernel_size=3, padding=1)
+        self.conv1 = nn.Conv2d(1, 8, kernel_size=5, padding=2)
+        self.conv2 = nn.Conv2d(8, 16, kernel_size=5, padding=2)
         self.conv3 = nn.Conv2d(16, 32, kernel_size=3, padding=1)
+        self.conv4 = nn.Conv2d(32, 64, kernel_size=3, padding=1)
         self.pool1 = nn.MaxPool2d(2, 2)
         self.pool2 = nn.MaxPool2d(2, 2)
         self.pool3 = nn.MaxPool2d(2, 2)
+        self.pool4 = nn.MaxPool2d(2, 2)
         self.bn1 = nn.BatchNorm2d(8)
         self.bn2 = nn.BatchNorm2d(16)
         self.bn3 = nn.BatchNorm2d(32)
-        self.fc1 = nn.Linear(int(32*input_size[0]/8*input_size[1]/8), 4)
+        self.bn4 = nn.BatchNorm2d(64)
+        self.fc1 = nn.Linear(int(64*input_size[0]/16*input_size[1]/16), int(64*input_size[0]/16*input_size[1]/16/2))
+        self.fc2 = nn.Linear(int(64*input_size[0]/16*input_size[1]/16/2), 4)
         self.float()
         self.cuda()
         self.input_size = input_size
@@ -62,8 +66,10 @@ class Simple_Blob_model(nn.Module):
         out = nn.functional.relu(self.bn1(self.pool1(self.conv1(x))))
         out = nn.functional.relu(self.bn2(self.pool2(self.conv2(out))))
         out = nn.functional.relu(self.bn3(self.pool3(self.conv3(out))))
-        out = out.view(-1, int(32*self.input_size[0]/8*self.input_size[1]/8))
-        out = nn.functional.softmax(self.fc1(out))
+        out = nn.functional.relu(self.bn4(self.pool4(self.conv4(out))))
+        out = out.view(-1, int(64*self.input_size[0]/16*self.input_size[1]/16))
+        out = nn.functional.relu(self.fc1(out))
+        out = nn.functional.softmax(self.fc2(out))
 
         return out
 

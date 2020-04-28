@@ -6,7 +6,7 @@ import numpy as np
 
 class Environement:
     def __init__(self):
-        self.world_size = (200, 200)
+        self.world_size = (32, 32)
         self.player = Player(int(np.random.uniform(0, 1) * self.world_size[0]), int(np.random.uniform(0, 1) * self.world_size[1]), 10, 10, 0)
         self.foods = []
         self.walls = []
@@ -59,16 +59,9 @@ class Environement:
 class Simple_blob_environement(Environement):
     def __init__(self):
         super().__init__()
-        self.player = Player(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-11)), 20, 20, 0)
+        self.player = Player(10, 10, 2, 2, 0)
 
-        #wall = Wall(int(np.random.uniform(0, 1) * (self.world_size[0]-26)), int(np.random.uniform(0, 1) * (self.world_size[1]-26)), 30, 50, 0)
-        #while rectangles_colision(wall, self.player):
-        #    wall = Wall(int(np.random.uniform(0, 1) * (self.world_size[0]-26)), int(np.random.uniform(0, 1) * (self.world_size[1]-26)), 30, 50, 0)
-        #self.walls.append(wall)
-
-        food = Food(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-11)), 20, 20, 0)
-        while rectangles_colision(self.player, food):
-            food = Food(int(np.random.uniform(0, 1) * (self.world_size[0]-11)), int(np.random.uniform(0, 1) * (self.world_size[1]-11)), 20, 20, 0)
+        food = Food(20, 20, 4, 4, 0)
         self.foods.append(food)
 
         self.interpreter = Perfect_info_interpretor()

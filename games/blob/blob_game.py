@@ -8,24 +8,22 @@ import sys
 grey = (200, 200, 200)
 black = (0, 0, 0)
 
-
 class Game:
     def __init__(self):
         self.running = True
         self.game_count = 0
-        self.cumul_reward = 0
-        self.max_game = 100
-        self.step_count = 0
-        self.max_step = 400
-        self.render = True
-        self.environement = Simple_blob_environement()
+        self.max_game = 300
+        self.max_step = 1000
+        
+        self.new_game()
         self.agent = DQN_agent(self.environement.world_size)
-        self.start_time = time.time()
+
+        
 
 
     def play(self):
         if self.render:
-            self.window = Window(grey, self.environement.world_size)
+          self.window = Window(black, self.environement.world_size)
 
         self.playing()
 
@@ -33,9 +31,12 @@ class Game:
         while self.running and self.game_count <= self.max_game:
 
             if self.game_over() or self.step_count >= self.max_step:
+                self.stats[1] = self.agent.eps
+                self.stats[3] = self.agent.loss
                 print(f"game {self.game_count} over, {self.step_count} steps, reward {self.cumul_reward}, temps: {time.time() - self.start_time}")
+                print(f"  start eps: {self.stats[0]}, end eps: {self.stats[1]}, start loss: {self.stats[2]}, mean loss: {self.stats[5]/self.step_count}")
+                print(f"  {self.stats[4]}")
                 self.new_game()
-                self.game_count += 1
             else:
                 self.step()
 
@@ -51,19 +52,23 @@ class Game:
         sys.exit()
 
     def new_game(self):
-        self.render = (self.game_count%20 == 0)
-        self.agent = DQN_agent(self.environement.world_size)
+        self.game_count += 1
+        self.render = (self.game_count%10 == 0) and self.game_count > 10
+        self.environement = Simple_blob_environement()
         self.step_count = 0
         self.cumul_reward = 0
         self.start_time = time.time()
-        self.environement = Simple_blob_environement()
+        self.stats = [0, 0, 0, 0, [], 0]
 
     def game_over(self):
         return self.environement.game_over()
 
     def step(self):
         state = self.environement.get_state()
-        action = self.agent.get_action(state)
+
+        step_count = (self.game_count*self.max_step) + self.step_count
+        action = self.agent.get_action(state, step_count)
+        self.stats[4].append(action)
 
         self.environement.turn(action)
 
@@ -73,11 +78,16 @@ class Game:
         self.agent.store_transition(state, action, new_state, self.cumul_reward)
 
         #learn
-        if (self.step_count >= 100 or self.game_count > 0) and self.step_count %10 == 0:
+        #if (self.game_count > 1) and self.step_count %5 == 0:
+        if (self.game_count > 10):
             self.agent.train()
+            if self.step_count == 0:
+              self.stats[0] = self.agent.eps
+              self.stats[2] = self.agent.loss
+            self.stats[5] += self.agent.loss
 
         #copy both networks
-        if self.step_count % 100 == 0:
+        if self.step_count % 450 == 0:
             self.agent.learn()
 
         self.step_count += 1

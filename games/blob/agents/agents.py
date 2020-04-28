@@ -3,6 +3,7 @@ import numpy as np
 from games.blob.agents.models import Simple_Blob_model, ReplayMemory
 import time
 import torch
+import math
 
 
 
@@ -10,16 +11,21 @@ class DQN_agent:
     def __init__(self, world_size):
         self.policy_net = Simple_Blob_model(world_size)
         self.target_net = Simple_Blob_model(world_size)
-        self.replay_memory = ReplayMemory(50_000)
+        self.replay_memory = ReplayMemory(100_000)
         self.world_size = world_size
-        self.discount = 0.98
+        self.discount = 0.999
+        self.eps_start = 0.5
+        self.eps_end = 0.95
+        self.eps_decay = 100000
+        self.eps = 0
+        self.loss = 0
         self.optimizer = torch.optim.Adam(self.policy_net.parameters(), lr=0.001)
 
 
-    def get_action(self, state):
-        epsilon = 0.99
+    def get_action(self, state, steps):
+        self.eps = (self.eps_end + (self.eps_start - self.eps_end) * math.exp(-1*steps/self.eps_decay))
 
-        if np.random.random() > epsilon:
+        if np.random.random() > self.eps:
             return np.random.randint(0, 4)
 
         return self.predict(state)
@@ -56,6 +62,7 @@ class DQN_agent:
 
         #calculer la loss
         loss = torch.nn.functional.smooth_l1_loss(states_actions_values, expected_state_action_values.unsqueeze(1))
+        self.loss = loss.item()
 
         self.optimizer.zero_grad()
         loss.backward()

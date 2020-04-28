@@ -32,6 +32,6 @@ class Perfect_info_interpretor:
         reward = -1
 
         if len(foods) == 0:
-            reward = 500
+            reward = 1300
 
         return reward

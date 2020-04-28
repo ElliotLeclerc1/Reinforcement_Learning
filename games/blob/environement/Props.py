@@ -8,7 +8,7 @@ black = (0, 0, 0)
 class Food(Shapes.Rectangle):
     def __init__(self, x, y, width, height, angle):
         super().__init__(x, y, width, height, angle)
-        self.color = (0, 0, 255)
+        self.color = (255, 0, 0)
 
     def render(self, display):
         pygame.draw.polygon(display, self.color, self.corners)
@@ -26,8 +26,8 @@ class Wall(Shapes.Rectangle):
 class Player(Shapes.Rectangle):
     def __init__(self, x, y, width, height, angle):
         super().__init__(x, y, width, height, angle)
-        self.color = (0, 255, 0)
-        self.speed = 5
+        self.color = white
+        self.speed = 1
 
     def move(self, displacement):
         super().move(displacement)
